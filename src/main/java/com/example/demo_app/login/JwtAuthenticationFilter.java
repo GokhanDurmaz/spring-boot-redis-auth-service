@@ -14,7 +14,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import io.jsonwebtoken.Claims;
 import java.io.IOException;
-import java.util.Date;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -36,9 +35,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // Re-authenticate with the token to get proper authorities
                 Authentication authentication = authManager.authenticate(
                         new UsernamePasswordAuthenticationToken(username, "")
-                                .setDetails(new org.springframework.security.authentication.AbstractAuthenticationDetails() {
-                                    @Override public Object getPrincipal() { return username; }
-                                    @Override public void setAuthenticated(boolean authenticated) {}
+                                .setPrincipal(username)
+                                .setDetails(new org.springframework.security.authentication.AbstractUserDetails() {
+                                    @Override public Object getPassword() { return null; }
+                                    @Override public String getUsername() { return username; }
+                                    @Override public Collection<? extends GrantedAuthority> getAuthorities() {
+                                        var user = userDetailsService.loadUserByUsername(username);
+                                        return user.getAuthorities();
+                                    }
                                 })
                 );
 

@@ -26,7 +26,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .setSubject(username)
                 .addClaims(extraClaims != null ? extraClaims : new HashMap<>())
-                .signWith(key, io.jsonwebtoken.security.SignatureAlgorithm.HS256)
+                .signWith(key, io.jsonwebtoken.security.SignatureAlgorithm.HMAC_SHA_256)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 3600_000)) // 1 hour
                 .compact();

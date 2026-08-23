@@ -41,8 +41,6 @@ public class SecurityConfig {
                 .csrf().disable() // Disable CSRF for stateless JWT
                 .sessionManagement(session -> session.sessionCreationPolicy(
                         org.springframework.security.config.http.SessionCreationPolicy.STATELESS))
-                .addFilterBefore(new JwtAuthenticationFilter(), 
-                        org.springframework.security.web.FilterChainProxy.class)
                 ;
         return http.build();
     }
