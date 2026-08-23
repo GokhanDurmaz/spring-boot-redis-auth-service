@@ -2,24 +2,31 @@ package com.example.demo_app.login;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+@Component
 public class JwtUtil {
 
-    @Value("${jwt-secret}")
+    @Value("${jwt.secret-key}")
     private String secretKey;
 
-    public static String generateToken(String username) {
+    public static String generateToken(String username, Map<String, Object> extraClaims) {
+        SecretKey key = Keys.secretKeyFor(java.security.MessageDigest.getInstance("SHA-256"))
+                .deriveSecretKey(32); // 256-bit key for HS256
+
         return Jwts.builder()
                 .setSubject(username)
-                .addClaims(new HashMap<>())
-                .signWith(io.jsonwebtoken.security.Keys.secretKeyForSha256(secretKey.getBytes()), io.jsonwebtoken.SignatureAlgorithm.RS256)
+                .addClaims(extraClaims != null ? extraClaims : new HashMap<>())
+                .signWith(key, io.jsonwebtoken.security.SignatureAlgorithm.HS256)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 3600_000)) // 1 hour
-                .signWith(io.jsonwebtoken.security.Keys.secretKeyForSha256(secretKey.getBytes()), io.jsonwebtoken.SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -39,7 +46,4 @@ public class JwtUtil {
             return false;
         }
     }
-
-    @Value("${jwt.secret-key}")
-    private String secretKey;
 }

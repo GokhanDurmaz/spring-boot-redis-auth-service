@@ -1,26 +1,30 @@
 package com.example.demo_app.login;
 
-import io.jsonwebtoken.Claims;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
+
 import java.io.IOException;
+import java.util.Date;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired private AuthenticationManager authManager;
+    @Autowired private CustomUserDetailsService userDetailsService;
+
+    private static final String AUTHORIZATION_HEADER = "Authorization";
+    private static final String BEARER_PREFIX = "Bearer ";
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                     HttpServletResponse response,
-                                     FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
             String token = extractTokenFromHeader(request);
             if (token != null && JwtUtil.validateToken(token)) {
@@ -29,7 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 // Re-authenticate with the token to get proper authorities
                 Authentication authentication = authManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(username, "") // no password needed for JWT
+                        new UsernamePasswordAuthenticationToken(username, "")
                                 .setDetails(new org.springframework.security.authentication.AbstractAuthenticationDetails() {
                                     @Override public Object getPrincipal() { return username; }
                                     @Override public void setAuthenticated(boolean authenticated) {}
@@ -40,16 +44,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         } catch (Exception e) {
             // Token is invalid, skip authentication check and pass through
+            filterChain.doFilter(request, response);
         }
-        filterChain.doFilter(request, response);
     }
 
     private String extractTokenFromHeader(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7).trim();
+        String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
+        if (bearerToken != null && bearerToken.startsWith(BEARER_PREFIX)) {
+            return bearerToken.substring(BEARER_PREFIX.length()).trim();
         }
         return null;
     }
 }
-
