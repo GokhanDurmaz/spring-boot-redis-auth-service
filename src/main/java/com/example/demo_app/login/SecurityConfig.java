@@ -6,13 +6,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
     @Autowired private CustomUserDetailsService userDetailsService;
@@ -24,7 +24,10 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(BCryptPasswordEncoder encoder) throws Exception {
-        var authManager = AuthenticationManagerBuilder.builder().build();
+        var authManager = org.springframework.security.authentication.AuthenticationManagerBuilder.builder()
+                .userDetailsService(userDetailsService)
+                .passwordEncoder(encoder)
+                .build();
         return authManager;
     }
 
@@ -36,10 +39,11 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
 
                 .csrf().disable() // Disable CSRF for stateless JWT
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(new JwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .sessionManagement(session -> session.sessionCreationPolicy(
+                        org.springframework.security.config.http.SessionCreationPolicy.STATELESS))
+                .addFilterBefore(new JwtAuthenticationFilter(), 
+                        org.springframework.security.web.FilterChainProxy.class)
                 ;
         return http.build();
     }
 }
-

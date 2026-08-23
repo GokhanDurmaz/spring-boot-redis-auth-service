@@ -49,7 +49,8 @@ public class LoginController {
             authentication = authManager.authenticate(new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
                     userDetails,
                     request.getPassword(),
-                    userDetails.getAuthorities()));
+                    userDetails.getAuthorities()
+            ));
         } else if (request.getPassword() != null && !request.getPassword().isEmpty()) {
             // Initial login with username/password
             var user = userRepository.findByUsername(request.getUsername());
@@ -58,7 +59,8 @@ public class LoginController {
             }
             authentication = authManager.authenticate(new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
                     userDetails,
-                    request.getPassword()));
+                    request.getPassword()
+            ));
         }
 
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -66,7 +68,10 @@ public class LoginController {
         }
 
         var authenticatedUser = userDetailsService.loadUserByUsername(request.getUsername());
-        String token = JwtUtil.generateToken(authenticatedUser.getUsername(), authenticatedUser.getAuthorities());
+        String token = JwtUtil.generateToken(authenticatedUser.getUsername(), 
+                authenticatedUser.getAuthorities().stream()
+                        .map(a -> a.getAuthority())
+                        .collect(java.util.stream.Collectors.toList()));
         long expirationTime = System.currentTimeMillis() + 36_000_000L; // 1 hour in ms
 
         return ResponseEntity.ok(new LoginResponse(token, expirationTime));
@@ -89,6 +94,6 @@ public class LoginController {
     @GetMapping("/auth/me")
     public ResponseEntity<UserInfo> getCurrentUser() {
         var user = userRepository.findByUsername(null); // dummy, needs auth context
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(new UserInfo(user.getUsername(), "user@example.com"));
     }
 }

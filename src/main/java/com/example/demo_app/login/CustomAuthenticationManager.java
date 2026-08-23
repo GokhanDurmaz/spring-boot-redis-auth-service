@@ -15,6 +15,6 @@ public class CustomAuthenticationManager {
     public LoginResponse authenticate(String username, String password) {
         var token = new UsernamePasswordAuthenticationToken(username, password);
         var authenticatedUser = authManager.authenticate(token);
-        return new LoginResponse(authenticatedUser.getName());
+        return new LoginResponse(authenticatedUser.getName(), 3600_000L); // 1 hour in ms
     }
 }

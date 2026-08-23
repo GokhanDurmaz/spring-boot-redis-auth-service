@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,8 +19,9 @@ public class JwtUtil {
     private String secretKey;
 
     public static String generateToken(String username, Map<String, Object> extraClaims) {
-        SecretKey key = Keys.secretKeyFor(java.security.MessageDigest.getInstance("SHA-256"))
-                .deriveSecretKey(32); // 256-bit key for HS256
+        SecretKey key = Keys.hmacShaKeyFor(
+                (secretKey + "demo-app-jwt-secret".getBytes(StandardCharsets.UTF_8))
+        );
 
         return Jwts.builder()
                 .setSubject(username)
@@ -32,7 +34,7 @@ public class JwtUtil {
 
     public static Claims getClaims(String token) {
         try {
-            return Jwts.parserBuilder().build().parseClaimsJws(token).getBody();
+            return Jwts.parser().build().parseClaimsJws(token).getBody();
         } catch (Exception e) {
             throw new RuntimeException("Invalid JWT token", e);
         }
