@@ -1,4 +1,4 @@
-package com.example.demo_app.login;
+package com.example.demo_app.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;

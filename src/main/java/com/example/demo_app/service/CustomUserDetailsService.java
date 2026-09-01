@@ -1,6 +1,9 @@
-package com.example.demo_app.login;
+package com.example.demo_app.service;
 
+import com.example.demo_app.entity.User;
+import com.example.demo_app.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -18,18 +21,19 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        var user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new UsernameNotFoundException("User not found: " + username);
-        }
-        // Return a UserDetails object without the password hash (already hashed in DB)
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
-                .password("") // empty — already verified via JWT token
-                .roles("USER").build();
+                .password(user.getPasswordHash()) // BCrypt hash in db
+                .roles("USER")
+                .build();
     }
 
+    @Cacheable(value = "users", key = "#username")
     public User findUserByUsername(String username) {
-        return userRepository.findByUsername(username);
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
     }
 }

@@ -1,4 +1,4 @@
-package com.example.demo_app.login;
+package com.example.demo_app.dao;
 
 public class UserInfo {
     private String username;

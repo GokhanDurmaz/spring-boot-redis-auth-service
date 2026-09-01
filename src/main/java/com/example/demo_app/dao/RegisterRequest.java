@@ -1,4 +1,4 @@
-package com.example.demo_app.login;
+package com.example.demo_app.dao;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

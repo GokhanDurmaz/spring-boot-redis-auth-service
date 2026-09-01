@@ -1,6 +1,4 @@
-package com.example.demo_app.login;
-
-import java.util.Date;
+package com.example.demo_app.dao;
 
 public class LoginResponse {
     private String token;
