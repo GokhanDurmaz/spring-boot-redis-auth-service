@@ -1,4 +1,4 @@
-name: Deploy to Kubernetes
+name: Deploy and Validate Kubernetes Manifests
 
 on:
   push:
@@ -11,11 +11,10 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Kubeconfig
-        uses: azure/k8s-set-context@v3
+      - name: Create KinD Cluster
+        uses: helm/kind-action@v1.10.0
         with:
-          method: kubeconfig
-          kubeconfig: ${{ secrets.KUBECONFIG }} # K8s cluster info
+          cluster_name: kind-cluster
 
       - name: Create Postgres Secret Dynamically
         run: |
@@ -28,3 +27,8 @@ jobs:
       - name: Deploy Kubernetes Manifests
         run: |
           kubectl apply -f k8s/
+
+      - name: Verify Deployment
+        run: |
+          kubectl get pods --all-namespaces
+          kubectl get svc
