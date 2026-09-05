@@ -6,9 +6,8 @@ public class RefreshRequest {
     @NotBlank(message = "Username is required")
     private String username;
 
+    public RefreshRequest() {}
+
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
-
-    // Default constructor for JSON deserialization
-    private RefreshRequest() {}
 }

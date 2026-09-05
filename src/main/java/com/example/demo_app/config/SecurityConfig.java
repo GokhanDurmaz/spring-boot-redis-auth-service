@@ -3,6 +3,7 @@ package com.example.demo_app.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -30,12 +31,18 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
-            .cors(AbstractHttpConfigurer::disable)
+            // CORS'u devre dışı bırakmak yerine varsayılan yapılandırmayı aktif edin
+            .cors(Customizer.withDefaults())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/v1/users/**").permitAll()
-                .requestMatchers("/error").permitAll() // <-- KRİTİK EKLENTİ
-                .requestMatchers("/actuator/**").permitAll()
+                // 1. Auth endpoint'lerine (Login/Register) herkes erişebilmeli
+                .requestMatchers("/api/auth/**").permitAll()
+                // 2. WebController tarafındaki HTML sayfaları (Thymeleaf/Static)
+                .requestMatchers("/login", "/register", "/").permitAll()
+                // 3. Sistem / Hata / Actuator endpoint'leri
+                .requestMatchers("/error", "/actuator/**").permitAll()
+                // 4. Korumalı endpoint'ler (Örn: /api/v1/users/** için token şart)
+                .requestMatchers("/api/v1/users/**").authenticated()
                 .anyRequest().authenticated()
             )
             .formLogin(AbstractHttpConfigurer::disable)
