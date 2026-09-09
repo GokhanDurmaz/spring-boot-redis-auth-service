@@ -70,7 +70,6 @@ public class LoginController {
 
         userRepository.save(user);
 
-        // Otomatik login için token üretimi
         String token = JwtUtil.generateToken(user.getUsername(), user.getAuthorities());
 
         Map<String, String> response = new HashMap<>();

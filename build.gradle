@@ -42,6 +42,12 @@ dependencies {
 	// Redis
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
+
+	// Bucket4j - Ratelimiting library
+	implementation 'com.bucket4j:bucket4j-core:8.10.1'
+
+	// Bucket4j - Redis JCache/Lettuce impl.
+	implementation 'com.bucket4j:bucket4j-redis:8.10.1'
 }
 
 tasks.named('test') {

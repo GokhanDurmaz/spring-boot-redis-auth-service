@@ -3,13 +3,18 @@ kind: Ingress
 metadata:
   name: app-ingress
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
 spec:
+  tls:
+  - hosts:
+    - mysite.local
+    secretName: mysite-tls-secret
   rules:
   - host: mysite.local
     http:
       paths:
+      # 1. Spring Boot API
       - path: /api
         pathType: Prefix
         backend:
@@ -17,6 +22,7 @@ spec:
             name: springboot-service
             port:
               number: 8080
+      # 2. React Frontend
       - path: /
         pathType: Prefix
         backend:
