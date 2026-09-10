@@ -12,6 +12,7 @@ import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import io.github.bucket4j.distributed.ExpirationAfterWriteStrategy;
 import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.api.StatefulRedisConnection;
@@ -48,6 +49,12 @@ public class RedisConfig {
         );
 
         return LettuceBasedProxyManager.builderFor(connection)
+                .withClientSideConfig(
+                    io.github.bucket4j.distributed.proxy.ClientSideConfig.getDefault()
+                        .withExpirationAfterWriteStrategy(
+                            ExpirationAfterWriteStrategy.fixedTimeToLive(Duration.ofMinutes(1))
+                        )   
+                )
                 .build();
     }
 }
