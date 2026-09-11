@@ -1,9 +1,14 @@
-FROM gradle:8.5-jdk17 AS builder
+FROM gradle:9.0.0-jdk17 AS builder
 WORKDIR /build
 
 COPY gradle gradle
 COPY gradlew .
 COPY build.gradle settings.gradle ./
+
+RUN chmod +x gradlew
+
+RUN ./gradlew dependencies --no-daemon --configuration compileClasspath || true
+
 COPY src src
 
 RUN ./gradlew bootJar --no-daemon -x test
