@@ -36,7 +36,7 @@ spec:
     spec:
       containers:
       - name: springboot-app
-        image: demo-app:v1
+        image: demo-app:latest
         imagePullPolicy: Never
         ports:
         - containerPort: 8080
@@ -44,7 +44,7 @@ spec:
         env:
         # --- Postgres Configuration ---
         - name: SPRING_DATASOURCE_URL
-          value: jdbc:postgresql://postgres-service:5432/demo-app
+          value: jdbc:postgresql://postgres-service:5432/demodb
         - name: SPRING_DATASOURCE_USERNAME
           valueFrom:
             secretKeyRef:

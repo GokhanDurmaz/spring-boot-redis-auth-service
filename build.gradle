@@ -48,6 +48,9 @@ dependencies {
 
 	// Bucket4j - Redis JCache/Lettuce impl.
 	implementation 'com.bucket4j:bucket4j-redis:8.10.1'
+
+	// Logstash
+	implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
 }
 
 tasks.named('test') {
