@@ -1,14 +1,12 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: app-ingress
+  name: main-ingress
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/limit-rps: "10"
     nginx.ingress.kubernetes.io/limit-burst-multiplier: "5"
-    nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   tls:
   - hosts:
@@ -18,36 +16,36 @@ spec:
   - host: mysite.local
     http:
       paths:
-      # Spring Boot REST API
-      - path: /api(/|$)(.*)
-        pathType: ImplementationSpecific
+      # 1. Spring Boot API
+      - path: /api
+        pathType: Prefix
         backend:
           service:
             name: springboot-service
             port:
               number: 8080
 
-      # Kibana UI
-      - path: /kibana(/|$)(.*)
-        pathType: ImplementationSpecific
+      # 2. Kibana UI
+      - path: /kibana
+        pathType: Prefix
         backend:
           service:
             name: kibana-service
             port:
               number: 5601
 
-      # Elasticsearch API (No need ELK port-forward anymore)
-      - path: /elasticsearch(/|$)(.*)
-        pathType: ImplementationSpecific
+      # 3. Elasticsearch API
+      - path: /elasticsearch
+        pathType: Prefix
         backend:
           service:
             name: elasticsearch-service
             port:
               number: 9200
 
-      # React Frontend App
-      - path: /(.*)
-        pathType: ImplementationSpecific
+      # 4. React Frontend App
+      - path: /
+        pathType: Prefix
         backend:
           service:
             name: frontend-app-service

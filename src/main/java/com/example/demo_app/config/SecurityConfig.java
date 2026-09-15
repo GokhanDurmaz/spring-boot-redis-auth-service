@@ -49,7 +49,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
-            .cors(Customizer.withDefaults()) // Aşağıdaki corsConfigurationSource bean'ini kullanır
+            .cors(Customizer.withDefaults())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .headers(headers -> headers
                 .httpStrictTransportSecurity(hsts -> hsts
@@ -64,6 +64,7 @@ public class SecurityConfig {
                 .requestMatchers("/error", "/actuator/**").permitAll()
                 // 2. Korumalı API endpoint'leri
                 .requestMatchers("/api/v1/users/**").authenticated()
+                .requestMatchers("/api/auth/change-password").authenticated()
                 .anyRequest().authenticated()
             )
             .formLogin(AbstractHttpConfigurer::disable)

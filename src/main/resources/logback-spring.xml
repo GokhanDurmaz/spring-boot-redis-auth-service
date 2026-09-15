@@ -2,7 +2,7 @@
 <configuration>
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
     
-    <!-- Konsol Log Formatı -->
+    <!-- Konsol Log Format -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>${CONSOLE_LOG_PATTERN}</pattern>
@@ -13,6 +13,13 @@
     <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <destination>logstash-service:5000</destination>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
+    </appender>
+
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>logstash-service:5000</destination>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
+        <connectionTimeout>2 seconds</connectionTimeout>
+        <reconnectionDelay>10 seconds</reconnectionDelay>
     </appender>
 
     <root level="INFO">

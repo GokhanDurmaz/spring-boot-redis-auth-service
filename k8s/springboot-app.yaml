@@ -42,9 +42,9 @@ spec:
         - containerPort: 8080
           protocol: TCP
         env:
-        # --- Postgres Configuration ---
+       # --- Postgres Configuration ---
         - name: SPRING_DATASOURCE_URL
-          value: jdbc:postgresql://postgres-service:5432/demodb
+          value: jdbc:postgresql://postgres-service:5432/postgres
         - name: SPRING_DATASOURCE_USERNAME
           valueFrom:
             secretKeyRef:

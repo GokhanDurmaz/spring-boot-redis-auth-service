@@ -16,9 +16,19 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "users")
+@Getter 
+@Setter 
+@NoArgsConstructor 
+@AllArgsConstructor 
+@Builder 
 public class User implements UserDetails, Serializable {
     
     @Id
@@ -28,22 +38,21 @@ public class User implements UserDetails, Serializable {
     @Column(nullable = false, unique = true)
     private String username;
 
-    @Column(nullable = false)
+    @Column(name = "password_hash", nullable = false)
     @JsonIgnore
     private String passwordHash;
 
-    public User() {}
+    @Column(name = "full_name")
+    private String fullName;
 
-    // Getter & Setter
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    
-    @Override
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    @Column(name = "email")
+    private String email;
 
-    public String getPasswordHash() { return passwordHash; }
-    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+    @Column(name = "avatar_url")
+    private String avatarUrl;
+
+    @Column(name = "bio", length = 500)
+    private String bio;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
