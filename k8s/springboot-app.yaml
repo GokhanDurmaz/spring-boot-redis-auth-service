@@ -45,6 +45,11 @@ spec:
        # --- Postgres Configuration ---
         - name: SPRING_DATASOURCE_URL
           value: jdbc:postgresql://postgres-service:5432/postgres
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: JWT_SECRET
         - name: SPRING_DATASOURCE_USERNAME
           valueFrom:
             secretKeyRef:

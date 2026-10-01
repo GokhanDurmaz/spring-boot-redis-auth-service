@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
@@ -18,11 +19,14 @@ import java.util.Map;
 @Component
 public class JwtUtil {
 
-    private static final String SECRET = "demo-app-jwt-secret-key-must-be-at-least-32-bytes-long!";
-    private static final SecretKey KEY = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
+    private final SecretKey key;
     private static final long EXPIRATION_TIME = 86400000; // 24 hour
 
-    public static String generateToken(String username, Object claims) {
+    public JwtUtil(@Value("${app.jwt.secret}") String secret) {
+        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public String generateToken(String username, Object claims) {
         Map<String, Object> claimsMap = new HashMap<>();
         
         if (claims != null) {
@@ -46,14 +50,14 @@ public class JwtUtil {
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(KEY)
+                .signWith(this.key)
                 .compact();
     }
 
-    public static Boolean validateToken(String token) {
+    public Boolean validateToken(String token) {
         try {
             Jwts.parser()
-                .verifyWith(KEY)
+                .verifyWith(this.key)
                 .build()
                 .parseSignedClaims(token);
             return true;
@@ -62,9 +66,9 @@ public class JwtUtil {
         }
     }
 
-    public static String extractUsername(String token) {
+    public String extractUsername(String token) {
         Claims claims = Jwts.parser()
-                .verifyWith(KEY)
+                .verifyWith(this.key)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();

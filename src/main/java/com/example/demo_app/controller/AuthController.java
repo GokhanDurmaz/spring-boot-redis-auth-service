@@ -28,17 +28,21 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     public AuthController(AuthenticationManager authenticationManager, 
-                           UserRepository userRepository, 
-                           PasswordEncoder passwordEncoder) {
+                            UserRepository userRepository, 
+                            PasswordEncoder passwordEncoder,
+                            JwtUtil jwtUtil) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
+        long t0 = System.currentTimeMillis();
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -46,8 +50,13 @@ public class AuthController {
                             loginRequest.getPassword()
                     )
             );
+            long t1 = System.currentTimeMillis();
 
-            String token = JwtUtil.generateToken(authentication.getName(), authentication.getAuthorities());
+            String token = jwtUtil.generateToken(authentication.getName(), authentication.getAuthorities());
+            long t2 = System.currentTimeMillis();
+
+            System.out.printf("--> [AUTH TIME] AuthManager: %d ms | JWT Gen: %d ms | TOTAL: %d ms%n", 
+                (t1 - t0), (t2 - t1), (t2 - t0));
 
             Map<String, String> response = new HashMap<>();
             response.put("token", token);
@@ -69,11 +78,12 @@ public class AuthController {
 
         User user = new User();
         user.setUsername(registerRequest.getUsername());
+        user.setEmail(registerRequest.getEmail());
         user.setPasswordHash(passwordEncoder.encode(registerRequest.getPassword()));
 
         userRepository.save(user);
 
-        String token = JwtUtil.generateToken(user.getUsername(), user.getAuthorities());
+        String token = jwtUtil.generateToken(user.getUsername(), user.getAuthorities());
 
         Map<String, String> response = new HashMap<>();
         response.put("token", token);

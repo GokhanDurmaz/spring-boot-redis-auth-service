@@ -3,7 +3,6 @@ package com.example.demo_app.service;
 import com.example.demo_app.dto.UserProfile;
 import com.example.demo_app.entity.User;
 import com.example.demo_app.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,15 +16,17 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
 
-    @Autowired
     public CustomUserDetailsService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
     @Override
+    @Cacheable(value = "security_users", key = "#username")
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+                .orElseThrow(
+                    () -> new UsernameNotFoundException("Couldn't find user: " + username)
+                );
 
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
@@ -34,14 +35,12 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .build();
     }
 
-    @Cacheable(value = "users", key = "#username")
-    public User findUserByUsername(String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
-    }
-
+    @Cacheable(value = "user_profiles", key = "#username")
     public UserProfile getUserProfile(String username) {
-        User user = findUserByUsername(username);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(
+                    () -> new UsernameNotFoundException("Couldn't find user: " + username)
+                );
         return UserProfile.builder()
                 .username(user.getUsername())
                 .fullName(user.getFullName())
@@ -52,9 +51,12 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Transactional
-    @CacheEvict(value = "users", key = "#username") // Clean cache for new inputs
+    @CacheEvict(value = {"security_users", "user_profiles"}, key = "#username") // Clean cache for new inputs
     public UserProfile updateUserProfile(String username, UserProfile dto) {
-        User user = findUserByUsername(username);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(
+                    () -> new UsernameNotFoundException("Couldn't find user: " + username)
+                );
 
         if (dto.getFullName() != null) {
             user.setFullName(dto.getFullName());

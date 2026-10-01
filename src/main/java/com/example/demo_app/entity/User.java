@@ -1,6 +1,5 @@
 package com.example.demo_app.entity;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
@@ -29,7 +28,7 @@ import lombok.Setter;
 @NoArgsConstructor 
 @AllArgsConstructor 
 @Builder 
-public class User implements UserDetails, Serializable {
+public class User implements UserDetails {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

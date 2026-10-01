@@ -55,6 +55,16 @@ dependencies {
 	// Lombook
 	compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+	// Stripe
+	implementation 'com.stripe:stripe-java:25.10.0'
+
+	// Test dependencies
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-webflux'
+	testRuntimeOnly 'com.h2database:h2'
 }
 
 tasks.named('test') {
